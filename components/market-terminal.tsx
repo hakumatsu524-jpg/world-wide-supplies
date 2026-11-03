@@ -1,0 +1,69 @@
+'use client'
+
+import { useMemo, useState } from 'react'
+import { ArrowDown, ArrowUp, ChevronDown, Globe2, Menu, Search, ShieldCheck, Sparkles, Wallet, X } from 'lucide-react'
+
+const categories = ['All markets', 'Agriculture', 'Metals', 'Energy', 'Materials', 'Livestock', 'Softs']
+const cryptoAssets = ['USDC', 'BTC', 'ETH']
+
+const itemNames = [
+  'Milk', 'Wheat', 'Corn', 'Rice', 'Soybeans', 'Cocoa', 'Coffee', 'Sugar', 'Cotton', 'Rubber',
+  'Palm Oil', 'Canola Oil', 'Olive Oil', 'Barley', 'Oats', 'Sorghum', 'Sunflower Seeds', 'Lentils', 'Chickpeas', 'Peanuts',
+  'Cattle', 'Hogs', 'Sheep', 'Poultry', 'Fish', 'Shrimp', 'Timber', 'Plywood', 'Pulp', 'Natural Rubber',
+  'Iron Ore', 'Steel', 'Aluminum', 'Copper', 'Zinc', 'Nickel', 'Lead', 'Tin', 'Cobalt', 'Lithium',
+  'Manganese', 'Chromium', 'Gold', 'Silver', 'Platinum', 'Palladium', 'Uranium', 'Coal', 'Crude Oil', 'Brent Crude',
+  'Natural Gas', 'Propane', 'Ethanol', 'Biodiesel', 'Jet Fuel', 'Gasoline', 'Diesel', 'Hydrogen', 'Solar Silicon', 'Cement',
+  'Limestone', 'Granite', 'Marble', 'Sand', 'Gravel', 'Clay', 'Glass', 'Salt', 'Sulfur', 'Phosphate',
+  'Potash', 'Ammonia', 'Urea', 'Soda Ash', 'Caustic Soda', 'Chlorine', 'Wood Pellets', 'Bamboo', 'Cork', 'Wool',
+  'Silk', 'Leather', 'Hemp', 'Flax', 'Jute', 'Vanilla', 'Tea', 'Black Pepper', 'Tobacco', 'Honey',
+  'Maple Syrup', 'Orange Juice', 'Frozen Concentrate', 'Avocado', 'Bananas', 'Apples', 'Potatoes', 'Tomatoes', 'Onions', 'Garlic',
+]
+
+const icons = ['AG', 'AG', 'AG', 'AG', 'AG', 'SF', 'SF', 'SF', 'SF', 'MT', 'AG', 'AG', 'AG', 'AG', 'AG', 'AG', 'AG', 'AG', 'AG', 'AG', 'LS', 'LS', 'LS', 'LS', 'LS', 'MT', 'MT', 'MT', 'MT', 'AG', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'EN', 'EN', 'EN', 'EN', 'EN', 'EN', 'EN', 'EN', 'EN', 'EN', 'EN', 'EN', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'MT', 'SF', 'SF', 'SF', 'SF', 'SF', 'SF', 'SF', 'SF', 'SF', 'SF', 'SF', 'SF', 'SF', 'AG', 'AG', 'AG', 'AG', 'AG', 'AG', 'AG']
+const prices = [3.42, 218.5, 4.91, 12.84, 10.67, 8.93, 5.74, 0.22, 0.78, 1.64, 1.09, 0.56, 7.21, 5.88, 3.52, 4.2, 11.38, 0.71, 1.48, 1.32, 184.2, 142.8, 121.6, 3.92, 9.74, 265.4, 521, 748, 632, 84.2, 108.5, 742, 2.46, 1.21, 2.13, 0.93, 1.08, 14.74, 27.6, 3.88, 18.2, 2378, 28.61, 983, 1021, 76.5, 89.8, 2.85, 81.42, 2.21, 7.14, 2.42, 1.87, 4.72, 1.95, 2.68, 3.14, 1.64, 96, 12.5, 118, 95, 0.23, 0.48, 0.61, 0.92, 31, 84, 312, 18, 0.3, 288, 0.35, 0.28, 236, 198, 142, 15.4, 3.7, 4.2, 1.31, 4.18, 1.8, 9.14, 7.68, 3.91, 1.54, 2.22, 1.66, 1.92, 0.98, 1.24, 1.92, 0.88, 3.54, 2.73, 2.16, 1.8, 1.28, 0.94, 1.62, 1.15]
+
+const markets = itemNames.map((name, index) => ({ name, symbol: name.replace(/[^A-Z]/gi, '').slice(0, 4).toUpperCase(), category: icons[index], price: prices[index], change: ((index * 17 % 91) - 38) / 10 }))
+
+export function MarketTerminal() {
+  const [query, setQuery] = useState('')
+  const [category, setCategory] = useState('All markets')
+  const [selected, setSelected] = useState(markets[0])
+  const [asset, setAsset] = useState('USDC')
+  const [side, setSide] = useState<'Buy' | 'Sell'>('Buy')
+  const [quantity, setQuantity] = useState('10')
+  const [notice, setNotice] = useState('')
+  const [mobileMenu, setMobileMenu] = useState(false)
+
+  const visibleMarkets = useMemo(() => markets.filter((market) => {
+    const matchesQuery = market.name.toLowerCase().includes(query.toLowerCase()) || market.symbol.toLowerCase().includes(query.toLowerCase())
+    const matchesCategory = category === 'All markets' || (category === 'Agriculture' && market.category === 'AG') || (category === 'Metals' && market.category === 'MT') || (category === 'Energy' && market.category === 'EN') || (category === 'Materials' && market.category === 'MT') || (category === 'Livestock' && market.category === 'LS') || (category === 'Softs' && market.category === 'SF')
+    return matchesQuery && matchesCategory
+  }), [query, category])
+
+  const total = (Number(quantity) || 0) * selected.price
+  const submitOrder = () => setNotice(`${side} order queued for ${quantity || '0'} units of ${selected.name} in ${asset}.`)
+
+  return (
+    <main className="min-h-screen bg-[#080a0b] text-[#f2f2ef] selection:bg-[#c7f36b] selection:text-black">
+      <header className="sticky top-0 z-20 border-b border-white/[0.08] bg-[#080a0b]/95 backdrop-blur">
+        <div className="mx-auto flex h-20 max-w-[1500px] items-center justify-between px-5 lg:px-10">
+          <div className="flex items-center gap-3"><img src="/world-wide-supplies-logo.png" alt="World Wide Supplies logo" className="h-11 w-11 rounded-full object-cover" /><div><p className="text-[15px] font-semibold tracking-tight">WORLD WIDE</p><p className="text-[10px] font-mono tracking-[0.28em] text-white/45">SUPPLIES / MARKETS</p></div></div>
+          <nav className="hidden items-center gap-8 text-[12px] font-medium text-white/55 md:flex"><a className="text-white" href="#markets">Markets</a><a href="#portfolio">Portfolio</a><a href="#about">How it works</a></nav>
+          <div className="flex items-center gap-3"><button className="hidden items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-xs text-white/70 sm:flex"><Wallet size={14} /> Connect wallet</button><button onClick={() => setMobileMenu(!mobileMenu)} className="rounded-md p-2 text-white/70 md:hidden" aria-label="Toggle menu">{mobileMenu ? <X size={18} /> : <Menu size={18} />}</button><div className="grid h-9 w-9 place-items-center rounded-full bg-[#c7f36b] text-sm font-semibold text-black">WW</div></div>
+        </div>
+        {mobileMenu && <div className="border-t border-white/[0.08] px-5 py-4 text-sm text-white/70 md:hidden"><a className="mr-5" href="#markets">Markets</a><a className="mr-5" href="#portfolio">Portfolio</a><a href="#about">How it works</a></div>}
+      </header>
+
+      <section className="mx-auto max-w-[1500px] px-5 pb-8 pt-10 lg:px-10 lg:pt-16"><div className="mb-10 flex flex-col justify-between gap-8 lg:flex-row lg:items-end"><div><p className="mb-4 flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.28em] text-[#c7f36b]"><span className="h-1.5 w-1.5 rounded-full bg-[#c7f36b]" /> Live global markets</p><h1 className="max-w-2xl text-4xl font-semibold tracking-[-0.06em] sm:text-6xl">The world&apos;s supply,<br /><span className="text-white/45">priced in motion.</span></h1></div><p className="max-w-xs text-sm leading-6 text-white/45">Access transparent commodity markets and trade physical-world essentials with digital settlement.</p></div>
+        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-white/[0.09] bg-white/[0.09] sm:grid-cols-4"><Stat label="Markets listed" value="100" /><Stat label="24h volume" value="$48.2M" /><Stat label="Active traders" value="12,840" /><Stat label="Settlement" value="On-chain" /></div></section>
+
+      <section id="markets" className="mx-auto max-w-[1500px] px-5 pb-20 lg:px-10"><div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]"><div className="overflow-hidden rounded-xl border border-white/[0.09] bg-[#0d1011]"><div className="flex flex-col gap-4 border-b border-white/[0.08] p-5 sm:flex-row sm:items-center sm:justify-between"><div><h2 className="text-lg font-medium tracking-tight">Commodity exchange</h2><p className="mt-1 text-xs text-white/40">100 global goods · prices per standard unit</p></div><div className="relative"><Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/35" /><input aria-label="Search markets" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search markets" className="h-9 w-full rounded-md border border-white/10 bg-white/[0.04] pl-9 pr-3 text-xs outline-none placeholder:text-white/30 focus:border-[#c7f36b]/60 sm:w-52" /></div></div><div className="flex gap-2 overflow-x-auto border-b border-white/[0.08] px-5 py-3">{categories.map((item) => <button key={item} onClick={() => setCategory(item)} className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[11px] ${category === item ? 'bg-[#c7f36b] font-medium text-black' : 'text-white/45 hover:bg-white/[0.06] hover:text-white'}`}>{item}</button>)}</div><div className="hidden grid-cols-[1.3fr_.7fr_.8fr_.7fr] px-5 py-3 text-[10px] font-mono uppercase tracking-[0.16em] text-white/30 sm:grid"><span>Asset</span><span>Unit</span><span>Last price</span><span>24h</span></div><div className="max-h-[560px] overflow-y-auto">{visibleMarkets.map((market) => <button key={market.name} onClick={() => setSelected(market)} className={`grid w-full grid-cols-[1.3fr_.7fr_.8fr_.7fr] items-center border-t border-white/[0.06] px-5 py-3 text-left transition hover:bg-white/[0.04] ${selected.name === market.name ? 'bg-white/[0.045]' : ''}`}><span className="flex min-w-0 items-center gap-3"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-white/[0.07] text-[9px] font-mono text-white/45">{market.category}</span><span className="min-w-0"><span className="block truncate text-sm font-medium">{market.name}</span><span className="block text-[10px] font-mono text-white/30">{market.symbol}</span></span></span><span className="text-xs text-white/45">/ unit</span><span className="text-sm font-mono">${market.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span><span className={`flex items-center gap-1 text-xs font-mono ${market.change >= 0 ? 'text-[#9dd660]' : 'text-[#f27c78]'}`}>{market.change >= 0 ? <ArrowUp size={12} /> : <ArrowDown size={12} />}{Math.abs(market.change).toFixed(1)}%</span></button>)}{visibleMarkets.length === 0 && <div className="p-10 text-center text-sm text-white/40">No markets match your search.</div>}</div></div>
+
+          <aside id="portfolio" className="h-fit rounded-xl border border-white/[0.09] bg-[#0d1011] p-5"><div className="mb-5 flex items-start justify-between"><div><p className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/35">Trade ticket</p><h2 className="mt-2 text-xl font-medium">{selected.name}</h2></div><span className="rounded-md bg-white/[0.07] px-2 py-1 text-[10px] font-mono text-white/40">{selected.symbol}</span></div><div className="mb-5 rounded-lg border border-white/[0.08] bg-black/20 p-4"><div className="flex items-end justify-between"><div><p className="text-2xl font-mono">${selected.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p><p className="mt-1 text-[11px] text-white/35">per standard unit</p></div><span className={`text-xs font-mono ${selected.change >= 0 ? 'text-[#9dd660]' : 'text-[#f27c78]'}`}>{selected.change >= 0 ? '+' : ''}{selected.change.toFixed(1)}% today</span></div><div className="mt-5 flex h-12 items-end gap-1 opacity-70">{[35, 44, 29, 48, 39, 54, 46, 67, 53, 73, 60, 84, 68, 76, 89, 72, 96, 82, 100].map((height, i) => <span key={i} className={`flex-1 rounded-t-sm ${i > 13 ? 'bg-[#c7f36b]' : 'bg-white/20'}`} style={{ height: `${height}%` }} />)}</div></div><div className="mb-4 grid grid-cols-2 gap-2 rounded-lg bg-white/[0.04] p-1"><button onClick={() => setSide('Buy')} className={`rounded-md py-2 text-xs ${side === 'Buy' ? 'bg-[#9dd660] font-medium text-black' : 'text-white/45'}`}>Buy</button><button onClick={() => setSide('Sell')} className={`rounded-md py-2 text-xs ${side === 'Sell' ? 'bg-[#f27c78] font-medium text-black' : 'text-white/45'}`}>Sell</button></div><label className="mb-2 block text-[10px] font-mono uppercase tracking-[0.15em] text-white/35">Settlement asset</label><div className="relative mb-4"><select value={asset} onChange={(e) => setAsset(e.target.value)} className="h-10 w-full appearance-none rounded-md border border-white/10 bg-white/[0.04] px-3 text-sm outline-none"><option>USDC</option><option>BTC</option><option>ETH</option></select><ChevronDown size={14} className="pointer-events-none absolute right-3 top-3 text-white/40" /></div><label className="mb-2 block text-[10px] font-mono uppercase tracking-[0.15em] text-white/35">Quantity (units)</label><input inputMode="decimal" value={quantity} onChange={(e) => setQuantity(e.target.value)} className="mb-4 h-10 w-full rounded-md border border-white/10 bg-white/[0.04] px-3 font-mono text-sm outline-none focus:border-[#c7f36b]/60" /><div className="mb-5 flex justify-between border-t border-white/[0.08] pt-4 text-xs"><span className="text-white/40">Estimated total</span><span className="font-mono">${total.toLocaleString(undefined, { minimumFractionDigits: 2 })} {asset}</span></div><button onClick={submitOrder} className="w-full rounded-md bg-[#c7f36b] py-3 text-sm font-semibold text-black transition hover:bg-[#d5ff84]">Review {side.toLowerCase()} order</button>{notice && <p role="status" className="mt-3 rounded-md border border-[#9dd660]/20 bg-[#9dd660]/10 p-3 text-xs leading-5 text-[#c7f36b]">{notice}</p>}<p className="mt-4 flex gap-2 text-[10px] leading-4 text-white/30"><ShieldCheck size={13} className="shrink-0" /> Demo exchange interface. Connect a wallet and complete compliance checks before any live settlement.</p></aside></div></section>
+
+      <footer id="about" className="border-t border-white/[0.08]"><div className="mx-auto flex max-w-[1500px] flex-col justify-between gap-4 px-5 py-8 text-[11px] text-white/35 sm:flex-row lg:px-10"><p className="flex items-center gap-2"><Globe2 size={14} /> World Wide Supplies · Global commodity access</p><p className="flex items-center gap-2"><Sparkles size={13} className="text-[#c7f36b]" /> Built for a more liquid world</p></div></footer>
+    </main>
+  )
+}
+
+function Stat({ label, value }: { label: string; value: string }) { return <div className="bg-[#0d1011] p-4 sm:p-5"><p className="text-[10px] font-mono uppercase tracking-[0.14em] text-white/35">{label}</p><p className="mt-2 text-lg font-medium tracking-tight sm:text-xl">{value}</p></div> }
